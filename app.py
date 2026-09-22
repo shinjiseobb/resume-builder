@@ -22,12 +22,29 @@ if not GEMINI_API_KEY or GEMINI_API_KEY.strip() == "" or "여기에" in GEMINI_A
 else:
     genai.configure(api_key=GEMINI_API_KEY)
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "templates"),
+    static_folder=os.path.join(BASE_DIR, "static")
+)
 
 @app.route("/")
 def index():
     """메인 화면 렌더링"""
     return render_template("index.html")
+
+@app.route("/manifest.json")
+def manifest():
+    """PWA 매니페스트 서빙"""
+    return app.send_static_file("manifest.json")
+
+@app.route("/sw.js")
+def service_worker():
+    """PWA 서비스 워커 서빙"""
+    response = app.send_static_file("sw.js")
+    response.headers["Content-Type"] = "application/javascript"
+    return response
 
 @app.route("/generate", methods=["POST"])
 def generate():
