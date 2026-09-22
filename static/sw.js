@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ai-resume-v1';
+const CACHE_NAME = 'ai-resume-v2';
 const STATIC_ASSETS = [
   '/',
   '/static/css/style.css',

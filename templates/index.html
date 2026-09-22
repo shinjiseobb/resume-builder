@@ -22,10 +22,31 @@
     <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
 </head>
 <body>
+    <!-- PWA 설치 유도 상단 배너 -->
+    <div id="pwa-install-banner" class="pwa-install-banner hidden">
+        <div class="banner-content">
+            <span class="banner-icon">📲</span>
+            <div class="banner-text">
+                <strong>홈 화면에 앱으로 설치하기</strong>
+                <span>앱으로 설치하면 주소창 없이 더 넓고 빠르게 사용할 수 있습니다.</span>
+            </div>
+        </div>
+        <div class="banner-actions">
+            <button type="button" id="banner-install-btn" class="banner-btn-install">앱 설치하기</button>
+            <button type="button" id="banner-close-btn" class="banner-btn-close" title="닫기" aria-label="닫기">✕</button>
+        </div>
+    </div>
+
     <div class="container">
         <!-- 헤더 영역 -->
         <header class="app-header">
-            <h1>🚀 AI Resume & Portfolio Builder</h1>
+            <div class="header-main-row">
+                <h1>🚀 AI Resume & Portfolio Builder</h1>
+                <button type="button" id="header-install-btn" class="header-install-btn hidden" title="앱으로 설치하기">
+                    <span class="btn-icon">📲</span>
+                    <span class="btn-label">앱 설치</span>
+                </button>
+            </div>
             <p class="subtitle">기본 정보를 입력하면 Gemini AI가 쉬었음 청년을 탈출하게 해드립니다.</p>
         </header>
 
@@ -170,6 +191,33 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- PWA 설치 방법 안내 모달 (직접 프롬프트가 미지원되거나 수동 설치 시) -->
+    <div id="pwa-guide-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>📲 앱 설치 방법 안내</h3>
+                <button type="button" id="modal-close-btn" class="modal-close-btn" title="닫기">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="guide-item">
+                    <span class="guide-badge">💻 PC (Chrome / Edge / 웨일)</span>
+                    <p>브라우저 주소창 맨 오른쪽 끝에 있는 <strong>[컴퓨터 모양 다운로드 아이콘]</strong> 또는 <strong>[설치]</strong> 버튼을 클릭하세요.</p>
+                </div>
+                <div class="guide-item">
+                    <span class="guide-badge">🤖 안드로이드 (Chrome / 삼성 인터넷)</span>
+                    <p>브라우저 우측 상단 메뉴(<strong>⋮</strong>)를 누른 후 <strong>[홈 화면에 추가]</strong> 또는 <strong>[앱 설치]</strong>를 선택하세요.</p>
+                </div>
+                <div class="guide-item">
+                    <span class="guide-badge">🍎 아이폰 / iPad (Safari)</span>
+                    <p>하단 중앙의 <strong>[공유 버튼 (네모+화살표 ⎋)]</strong>을 누른 후 <strong>[홈 화면에 추가]</strong>를 누르세요.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="modal-ok-btn" class="btn primary-btn">확인했습니다</button>
+            </div>
+        </div>
     </div>
 
     <!-- JavaScript 로직 연결 -->

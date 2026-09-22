@@ -264,4 +264,127 @@ document.addEventListener("DOMContentLoaded", () => {
 
         URL.revokeObjectURL(downloadUrl);
     });
+
+    // ========================================================
+    // PWA (Progressive Web App) 설치 지원 로직
+    // ========================================================
+    let deferredPrompt = null;
+
+    // PWA 관련 DOM 요소 캐싱
+    const installBanner = document.getElementById("pwa-install-banner");
+    const bannerInstallBtn = document.getElementById("banner-install-btn");
+    const bannerCloseBtn = document.getElementById("banner-close-btn");
+    const headerInstallBtn = document.getElementById("header-install-btn");
+    const guideModal = document.getElementById("pwa-guide-modal");
+    const modalCloseBtn = document.getElementById("modal-close-btn");
+    const modalOkBtn = document.getElementById("modal-ok-btn");
+
+    // 현재 독립 실행형(Standalone/PWA) 앱으로 실행 중인지 판별
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+    // 이미 설치된 앱으로 열지 않은 일반 웹 브라우저 환경인 경우
+    if (!isStandalone) {
+        // 헤더에 설치 버튼 항상 표시
+        if (headerInstallBtn) {
+            headerInstallBtn.classList.remove("hidden");
+        }
+
+        // 사용자가 이번 방문에서 배너를 닫지 않았다면 상단 배너도 표시
+        const bannerClosed = sessionStorage.getItem("pwa_banner_dismissed");
+        if (installBanner && bannerClosed !== "true") {
+            installBanner.classList.remove("hidden");
+        }
+    }
+
+    /**
+     * 브라우저의 PWA 설치 준비 이벤트 감지 (Chromium 계열 브라우저)
+     */
+    window.addEventListener("beforeinstallprompt", (e) => {
+        // 브라우저 기본 미니 정보바 방지
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // 설치 버튼 및 배너 확실히 활성화
+        if (!isStandalone) {
+            if (headerInstallBtn) headerInstallBtn.classList.remove("hidden");
+            if (installBanner && sessionStorage.getItem("pwa_banner_dismissed") !== "true") {
+                installBanner.classList.remove("hidden");
+            }
+        }
+    });
+
+    /**
+     * 설치 버튼 클릭 공통 핸들러
+     */
+    async function triggerPwaInstall() {
+        if (deferredPrompt) {
+            // 브라우저 네이티브 설치 대화상자 호출
+            deferredPrompt.prompt();
+            const choiceResult = await deferredPrompt.userChoice;
+            if (choiceResult.outcome === "accepted") {
+                console.log("사용자가 PWA 앱 설치를 수락했습니다.");
+                hideAllInstallUI();
+            } else {
+                console.log("사용자가 PWA 앱 설치를 취소했습니다.");
+            }
+            deferredPrompt = null;
+        } else {
+            // 브라우저가 직접 프롬프트를 지원하지 않거나(iOS Safari 등), 준비 전인 경우 친절한 가이드 모달 표시
+            openGuideModal();
+        }
+    }
+
+    /**
+     * 모든 설치 관련 UI 숨김
+     */
+    function hideAllInstallUI() {
+        if (installBanner) installBanner.classList.add("hidden");
+        if (headerInstallBtn) headerInstallBtn.classList.add("hidden");
+    }
+
+    /**
+     * 가이드 모달 열기/닫기
+     */
+    function openGuideModal() {
+        if (guideModal) guideModal.classList.remove("hidden");
+    }
+
+    function closeGuideModal() {
+        if (guideModal) guideModal.classList.add("hidden");
+    }
+
+    // 상단 배너 및 헤더 설치 버튼 클릭 이벤트
+    if (bannerInstallBtn) {
+        bannerInstallBtn.addEventListener("click", triggerPwaInstall);
+    }
+    if (headerInstallBtn) {
+        headerInstallBtn.addEventListener("click", triggerPwaInstall);
+    }
+
+    // 상단 배너 닫기(X) 버튼
+    if (bannerCloseBtn) {
+        bannerCloseBtn.addEventListener("click", () => {
+            if (installBanner) installBanner.classList.add("hidden");
+            sessionStorage.setItem("pwa_banner_dismissed", "true");
+        });
+    }
+
+    // 가이드 모달 닫기 이벤트
+    if (modalCloseBtn) modalCloseBtn.addEventListener("click", closeGuideModal);
+    if (modalOkBtn) modalOkBtn.addEventListener("click", closeGuideModal);
+    if (guideModal) {
+        guideModal.addEventListener("click", (e) => {
+            if (e.target === guideModal) closeGuideModal();
+        });
+    }
+
+    /**
+     * 앱 설치가 완료되었을 때 이벤트 감지
+     */
+    window.addEventListener("appinstalled", () => {
+        console.log("PWA 앱 설치 완료!");
+        hideAllInstallUI();
+        deferredPrompt = null;
+    });
 });
+
